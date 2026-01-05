@@ -2,970 +2,630 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Los Caza-Anuncios: Misión Revelación</title>
 <style>
   :root{
-    --bg:#0b0f10;
-    --panel:#11181c;
-    --hi:#00ffd0;
-    --warn:#ff3b3b;
-    --ok:#64ff64;
-    --text:#ffffff;
-    --muted:#b6c2c9;
-    --accent:#2dd4ff;
-    --gold:#ffe26d;
-    --btn:#1e2930;
-    --btnH:#2b3b44;
-    --info:#3bd1ff;
-    --sell:#ff7a3b;
-    --focus:#ffee00;
+    --bg:#0b0f10; --panel:#11181c; --hi:#00ffd0; --warn:#ff3b3b; --ok:#64ff64;
+    --text:#ffffff; --muted:#b6c2c9; --accent:#2dd4ff; --gold:#ffe26d;
+    --btn:#1e2930; --btnH:#2b3b44; --info:#3bd1ff; --sell:#ff7a3b; --focus:#ffee00;
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   body{
     margin:0; background:linear-gradient(180deg,#0b0f10,#0a0d10 60%,#0b0f10);
-    color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Color Emoji", "Apple Color Emoji", sans-serif;
+    color:var(--text); font-family:system-ui, -apple-system, sans-serif;
+    user-select:none; overflow-x:hidden;
   }
+  
+  /* HEADER */
   header{
     position:sticky; top:0; z-index:50;
-    background:rgba(10,13,16,0.9); backdrop-filter: blur(6px);
+    background:rgba(10,13,16,0.95); backdrop-filter: blur(8px);
     border-bottom:2px solid #0f1c22;
   }
   .bar{
     max-width:1100px; margin:auto; display:grid; gap:8px; padding:10px 12px;
-    grid-template-columns: 1fr auto auto auto auto;
-    align-items:center;
+    grid-template-columns: 1fr auto auto auto; align-items:center;
   }
-  h1{font-size:clamp(18px,3.3vw,28px); margin:0; line-height:1.1}
-  .hud{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+  h1{font-size:clamp(16px,3vw,24px); margin:0; line-height:1.1;}
   .chip{
-    background:#0f1720; border:2px solid #25313a; border-radius:14px; padding:6px 10px; font-weight:700; min-width:90px; text-align:center;
+    background:#0f1720; border:1px solid #25313a; border-radius:12px; 
+    padding:4px 10px; font-weight:700; font-size:14px; text-align:center;
   }
-  .lives span{font-size:20px}
-  .toggle{
-    display:flex; gap:8px; align-items:center; user-select:none; cursor:pointer;
-  }
-  .toggle input{transform:scale(1.4)}
-  main{max-width:1100px; margin:10px auto 80px; padding:10px 12px;}
-  .screen{display:none; border:2px solid #0f1c22; border-radius:16px; background:var(--panel); padding:14px;}
+
+  /* LAYOUT */
+  main{max-width:900px; margin:15px auto 80px; padding:0 12px;}
+  .screen{display:none; animation:fadeIn 0.4s ease;}
   .screen.active{display:block;}
-  .grid-brief{display:grid; gap:12px}
-  .brief-panel{
-    border:2px solid #23323a; border-radius:16px; padding:16px; background:#0f1519;
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)}}
+
+  /* TUTORIAL */
+  .tut-container {
+    background: #0f1519; border: 2px solid #23323a; border-radius: 16px; padding: 20px;
+    text-align: center; position: relative; overflow: hidden;
   }
-  .brief-split{display:grid; gap:10px; grid-template-columns:1fr 1fr}
-  .card{
-    border:3px solid #23323a; border-radius:16px; background:#0d1419; padding:12px; min-height:120px; position:relative; overflow:hidden;
-  }
-  .card h3{margin:0 0 4px; font-size:20px}
-  .card p{margin:6px 0; color:var(--muted)}
-  .btn{
-    font-size:clamp(18px,3.2vw,22px); padding:14px 18px; border-radius:16px; border:3px solid #2a3b43; background:var(--btn); color:var(--text); cursor:pointer; font-weight:900; letter-spacing:.3px;
-    box-shadow:0 4px 0 #0a1216; transition:.1s transform;
-    touch-action:manipulation;
-  }
-  .btn:disabled{opacity:.5; cursor:not-allowed; filter:grayscale(30%)}
-  .btn:hover{background:var(--btnH)}
-  .btn:active{transform:translateY(2px)}
-  .btn.big{font-size:clamp(20px,4.2vw,28px); padding:16px 22px}
-  .btn.primary{border-color:#0ae; background:#0b2733}
-  .btn.ok{border-color:#1d7; background:#0d3326}
-  .btn.warn{border-color:#f55; background:#331414}
-  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-  .center{display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap}
-  .right{display:flex; justify-content:flex-end}
-  .spacer{height:10px}
-  /* City / Scenarios */
-  .city{display:grid; grid-template-columns:1fr; gap:12px}
+  .step-box { display: none; }
+  .step-box.active { display: block; animation: slideIn 0.3s ease-out; }
+  @keyframes slideIn { from{transform:translateX(50px);opacity:0} to{transform:translateX(0);opacity:1}}
+  .tut-instruction { font-size: 18px; color: var(--hi); margin-bottom: 15px; }
+  .tut-desc { color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+  /* JUEGO & TARJETAS */
   .play-area{
-    position:relative; border:3px dashed #244; border-radius:16px; min-height:320px; padding:10px; overflow:hidden;
-    background:radial-gradient(200px 200px at 20% 0%, #0d1b22 0%, #0c1216 60%, #0b0f12 100%);
+    position:relative; border:3px dashed #244; border-radius:16px; min-height:340px; padding:15px; 
+    background:radial-gradient(circle at center, #131b20 0%, #0b0f12 100%);
+    display:grid; place-items:center; align-content:center;
   }
-  .targets{display:grid; gap:10px}
-  .video-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px}
-  .video-card{cursor:pointer; user-select:none}
-  .tag{position:absolute; top:8px; right:8px; background:#102028; padding:3px 8px; border:2px solid #2a3b43; border-radius:999px; font-size:14px}
-  .logo-box{position:absolute; bottom:10px; right:10px; background:#111; color:#fff; border:3px solid #444; border-radius:8px; padding:4px 6px; font-weight:800; font-size:14px}
-  .color-burst{position:absolute; inset:0; background:conic-gradient(from 90deg, #ff6a00, #ffd500, #ff00aa, #00ffd0, #ff6a00); mix-blend-mode:screen; opacity:.25; pointer-events:none}
+  .video-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; width:100%; align-items:start;}
+  .feed { display:grid; gap:15px; width:100%; max-width:500px; }
+
+  .card{
+    border:3px solid #23323a; border-radius:16px; background:#0d1419; padding:12px; 
+    position:relative; overflow:hidden; transition:transform 0.2s, border-color 0.2s; min-height:140px;
+    text-align:left; cursor:pointer;
+  }
+  /* Estilo cuando seleccionas una tarjeta con clic */
+  .card.selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.1);
+    transform: scale(1.02);
+    z-index: 5; /* Asegurar que quede encima al seleccionar */
+  }
+  
+  .card h3{margin:0 0 5px; font-size:18px; color:#fff;}
+  .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.4;}
+  
+  /* HALO (REVELADOR) */
   .halo{
-    position:absolute; inset:-3px; border-radius:14px; border:5px solid transparent; pointer-events:none; display:none;
+    position:absolute; inset:-3px; border-radius:14px; border:5px solid transparent; 
+    pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:2;
   }
-  .halo.info{display:block; border-color:var(--info); box-shadow:0 0 24px var(--info) inset, 0 0 18px var(--info)}
-  .halo.sell{display:block; border-color:var(--sell); box-shadow:0 0 24px var(--sell) inset, 0 0 18px var(--sell)}
+  .halo.info{opacity:1; border-color:var(--info); box-shadow:0 0 20px var(--info) inset;}
+  .halo.sell{opacity:1; border-color:var(--sell); box-shadow:0 0 20px var(--sell) inset;}
+  
   .stamp{
-    position:absolute; inset:auto 8px 8px auto; padding:6px 10px; border-radius:10px; font-weight:900; border:3px solid #234; background:#0b1a22; display:none;
+    position:absolute; bottom:10px; right:10px; padding:6px 10px; border-radius:8px; 
+    font-weight:900; border:2px solid #fff; background:#000; color:#fff; 
+    transform:rotate(-10deg) scale(0); transition:transform 0.3s; z-index:3;
   }
-  .stamp.on{display:block}
-  .stamp.ok{border-color:#194; background:#0a2618}
-  .stamp.warn{border-color:#944; background:#26110f}
+  .stamp.on{transform:rotate(-10deg) scale(1);}
+  .stamp.ok{border-color:var(--ok); color:var(--ok); background:#061a0f;}
+  .stamp.warn{border-color:var(--warn); color:var(--warn); background:#260a0a;}
+
   .explain{
-    position:absolute; inset:6px; background:rgba(0,0,0,.7); border:3px dashed var(--warn); border-radius:14px; padding:10px; display:none;
+    position:absolute; inset:0; background:rgba(0,0,0,0.95); border:2px solid var(--warn); 
+    padding:15px; z-index:4; display:none; flex-direction:column; justify-content:center;
   }
-  .explain.on{display:block; animation:blink 600ms steps(2,end) 3}
-  .explain b{color:var(--gold)}
-  @keyframes blink{50%{opacity:.4}}
-  /* Pop-up in Scenario 2 */
-  .popup{
-    position:absolute; inset:10% 8% auto 8%; background:#1a0f12; border:4px solid var(--warn); border-radius:16px; padding:16px; z-index:5; box-shadow:0 10px 40px rgba(0,0,0,.6);
-    display:none;
+  .explain.on{display:flex; animation:blink 0.5s 2;}
+
+  /* BOTONES */
+  .hud-actions{ margin-top:15px; display:grid; gap:10px; grid-template-columns: 1fr 1fr; }
+  .full-row { grid-column: 1 / -1; display:flex; gap:10px; justify-content:center;}
+  
+  .btn{
+    font-size:clamp(16px,2.5vw,20px); padding:14px; border-radius:12px; border:2px solid #2a3b43; 
+    background:var(--btn); color:var(--text); cursor:pointer; font-weight:800; 
+    transition:all .1s; display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow: 0 4px 0 #111;
   }
-  .popup.on{display:block}
-  .timer{font-weight:900; font-size:22px; color:var(--gold)}
-  .buy-btn{font-size:22px; padding:10px 14px; border-radius:14px; background:#331214; border:3px solid #ff5a5a; color:#fff; cursor:pointer}
-  /* Social feed */
-  .feed{display:grid; gap:10px}
-  .post{min-height:120px}
-  .img-cookie{
-    background:radial-gradient(circle at 30% 30%, #f7d9a3, #cc9a52);
-    border:4px solid #503418; color:#111;
+  .btn:active{transform:translateY(3px); box-shadow: 0 1px 0 #111;}
+  .btn:disabled{opacity:0.4; filter:grayscale(1); cursor:not-allowed;}
+  
+  .btn.primary{border-color:#0ae; background:#0b2733;}
+  .btn.ok{border-color:var(--ok); background:#0d3326; color:#dfffe0;}
+  .btn.warn{border-color:var(--sell); background:#331414; color:#ffe0d0;}
+  
+  .btn.active-tool {
+    border-color: var(--focus); background: #333300; color: var(--focus);
+    box-shadow: 0 0 15px var(--focus);
   }
-  .spon-tag{
-    position:absolute; top:8px; left:8px; background:#352; border:3px solid #6b6; color:#cfc; padding:4px 8px; border-radius:10px; font-weight:900; display:none;
-  }
-  /* HUD footer */
-  .hud-actions{
-    margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center
-  }
-  .classify{
-    display:flex; gap:10px; flex-wrap:wrap;
-  }
-  .glossary{
-    border:2px solid #24343d; border-radius:14px; padding:10px; background:#0d151a; font-size:16px
-  }
-  .glossary ul{margin:8px 0 0 18px}
-  .glossary b{color:var(--accent)}
-  /* Scanner lens */
+
+  .pulse { animation: pulseAnim 1.5s infinite; }
+  @keyframes pulseAnim { 0% {box-shadow:0 0 0 0 rgba(0,255,208,0.7)} 70% {box-shadow:0 0 0 12px rgba(0,255,208,0)} 100% {box-shadow:0 0 0 0 rgba(0,255,208,0)} }
+
+  /* LENS (MEJORADO: LIMPIO Y CLARO) */
   .lens{
-    position:fixed; width:110px; height:110px; border-radius:999px; border:4px solid var(--focus); pointer-events:none; mix-blend-mode:screen; z-index:60;
-    display:none; box-shadow:0 0 24px var(--focus), inset 0 0 30px rgba(255,255,0,.2);
+    position:fixed; width:120px; height:120px; border-radius:50%; 
+    border:4px solid var(--focus); 
+    /* Fondo casi transparente, solo un tinte muy sutil */
+    background: rgba(255, 255, 0, 0.05);
+    pointer-events:none; z-index:100; display:none;
+    /* Glow solo en el borde, sin opacar el centro */
+    box-shadow: 0 0 15px var(--focus), inset 0 0 10px rgba(255,255,0,0.2);
   }
-  .lens.scanning{display:block; animation:pulse 900ms infinite}
-  .lens::after{
-    content:'🔍 Revelador'; position:absolute; bottom:-30px; left:50%; transform:translateX(-50%); font-weight:900; font-size:14px; text-shadow:1px 1px 2px #000;
+  .lens.on{display:block;}
+  .lens::after{ content:'BUSCANDO...'; position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); background:var(--focus); color:#000; font-size:10px; padding:2px 4px; border-radius:4px; font-weight:bold;}
+
+  /* POPUP */
+  .popup-ad {
+    position:absolute; background:#201010; border:4px solid var(--warn); padding:20px; border-radius:16px;
+    box-shadow:0 20px 50px #000; text-align:center; z-index:10; max-width:320px;
+    display:none; animation:popIn 0.3s; cursor: pointer;
   }
-  @keyframes pulse{50%{box-shadow:0 0 38px var(--focus), inset 0 0 30px rgba(255,255,0,.35)}}
-  /* Report */
-  .report{
-    display:grid; gap:12px;
-  }
-  .badge{display:inline-block; padding:6px 10px; border-radius:12px; border:3px solid #2a3b43; background:#0e1a20; margin-right:6px; font-weight:900}
-  .pedia{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:8px}
-  .pedia .card{min-height:80px}
-  /* Pause overlay */
-  .overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; z-index:99;
-  }
-  .overlay.on{display:flex}
-  .modal{
-    width:min(720px,92vw); background:#0e1519; border:4px solid #244; border-radius:16px; padding:18px; text-align:center
-  }
-  .sr-only{
-    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
-  }
-  /* Responsive */
-  @media (max-width:860px){
-    .brief-split{grid-template-columns:1fr}
-    .video-grid{grid-template-columns:1fr; }
-  }
+  .popup-ad.active { display:block; }
+  /* Estilo seleccionado para el popup */
+  .popup-ad.selected { border-color: #fff; transform: scale(1.02); z-index: 15; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+  
+  @keyframes popIn { from{transform:scale(0.5); opacity:0;} to{transform:scale(1); opacity:1;} }
+  
+  /* OVERLAY */
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:200; display:none; place-items:center; padding:20px; text-align:center;}
+  .overlay.active{ display:grid; }
+  .modal{ background:#161f26; padding:25px; border-radius:16px; border:2px solid var(--warn); max-width:400px; }
+
 </style>
 </head>
 <body>
+
 <header>
-  <div class="bar" role="banner">
-    <h1>🕵️‍♂️ Los Caza-Anuncios: <span style="color:var(--accent)">Misión Revelación</span></h1>
-    <div id="stateChip" class="chip">BRIEFING</div>
-    <div id="scoreChip" class="chip">Puntaje: 0</div>
-    <div id="progChip" class="chip">Progreso: 0/0</div>
-    <div class="chip lives" id="livesChip" aria-live="polite">Vidas: <span>❤️❤️❤️</span></div>
-    <label class="toggle"><input id="voiceToggle" type="checkbox" /> Voz</label>
+  <div class="bar">
+    <h1>🕵️‍♂️ Caza-Anuncios</h1>
+    <div class="chip" id="stateChip">TUTORIAL</div>
+    <div class="chip" id="livesChip">❤️❤️❤️</div>
+    <div class="chip" id="scoreChip">0</div>
   </div>
 </header>
 
 <main>
-  <!-- BRIEFING -->
-  <section id="briefingScreen" class="screen active" aria-labelledby="btitle">
-    <h2 id="btitle">🚀 Briefing: ¡Prepárate, Caza-Anuncios!</h2>
-    <div class="grid-brief">
-      <div class="brief-panel">
-        <h3>Panel 1 — Informativo vs. Publicitario</h3>
-        <div class="brief-split">
-          <div class="card">
-            <h3>📚 Documental de Leones</h3>
-            <p>Describe cómo viven y cazan. <b>Intención:</b> informar.</p>
-          </div>
-          <div class="card">
-            <div class="color-burst"></div>
-            <h3>💰 Cereal con Mascota</h3>
-            <p>Colores fuertes, mascota gritando <b>“¡CÓMPRALO YA!”</b> — Intención: vender/persuadir.</p>
+  <!-- PANTALLA 1: BRIEFING / TUTORIAL INTERACTIVO -->
+  <section id="screenBriefing" class="screen active">
+    <div class="tut-container">
+      
+      <!-- Paso 1 -->
+      <div id="step1" class="step-box active">
+        <div style="font-size:40px; margin-bottom:10px;">👋</div>
+        <h2 class="tut-instruction">Bienvenido</h2>
+        <p class="tut-desc">Internet tiene dos caras: <b>Información Útil</b> y <b>Publicidad Oculta</b>.<br>Tu misión es identificar cuál es cuál.</p>
+        <button class="btn primary big" onclick="nextStep(2)">Continuar</button>
+      </div>
+
+      <!-- Paso 2: Herramientas -->
+      <div id="step2" class="step-box">
+        <div style="font-size:40px; margin-bottom:10px;">🛠️</div>
+        <h2 class="tut-instruction">Herramientas</h2>
+        <p class="tut-desc">Tienes un <b>Revelador</b>. Haz clic en el botón de abajo para encenderlo o apagarlo. Pruébalo ahora:</p>
+        <button id="btnTutScanner" class="btn primary pulse">🔦 ENCENDER REVELADOR</button>
+      </div>
+
+      <!-- Paso 3: Selección -->
+      <div id="step3" class="step-box">
+        <h2 class="tut-instruction">Identificar y Seleccionar</h2>
+        <p class="tut-desc">1. Pasa el revelador. Verás un <b>Halo Naranja</b>.<br>2. <b>HAZ CLIC en la tarjeta</b> para seleccionarla.</p>
+        
+        <div style="display:flex; justify-content:center; margin:20px 0;">
+          <div class="card" id="tutTarget" data-intent="sell" style="width:250px;">
+            <h3>¡GANASTE UN IPHONE!</h3>
+            <p>Haz clic aquí ya para reclamarlo.</p>
+            <div class="halo"></div>
+            <div class="stamp"></div>
           </div>
         </div>
+        <p id="tutStatus" style="font-size:14px; color:var(--muted)">Esperando selección...</p>
       </div>
-      <div class="brief-panel">
-        <h3>Panel 2 — Técnicas Publicitarias</h3>
-        <ul>
-          <li>Colores brillantes y llamativos 🎨</li>
-          <li>Música/ritmo pegajoso 🎵</li>
-          <li>Urgencia: <b>“¡OFERTA LIMITADA!”</b>, <b>“¡COMPRA YA!”</b> ⏱️</li>
-          <li>Etiqueta <b>“patrocinado”</b> o <b>código de descuento</b></li>
-        </ul>
-      </div>
-      <div class="brief-panel">
-        <h3>Panel 3 — Tu Herramienta</h3>
-        <p>El <b>Revelador de Intenciones</b> te deja “apuntar y revelar” lo que hay detrás. Mantén pulsado (clic/tap) o presiona <kbd>Espacio</kbd> para escanear. Luego clasifica con 📚 o 💰 (<kbd>1</kbd>/<kbd>2</kbd>).</p>
-        <div class="center">
-          <button class="btn big primary" id="startBtn">🎯 Recibir Revelador y entrar a la Ciudad</button>
+
+      <!-- Paso 4: Clasificación -->
+      <div id="step4" class="step-box">
+        <h2 class="tut-instruction">Clasificar</h2>
+        <p class="tut-desc">La tarjeta está seleccionada (borde blanco).<br>Como vimos el halo naranja, presiona el botón correcto:</p>
+        <div class="hud-actions">
+          <button id="btnTutInfo" class="btn ok">📚 Informar</button>
+          <button id="btnTutSell" class="btn warn pulse">💰 Publicidad</button>
         </div>
+      </div>
+
+      <!-- Paso 5: Fin -->
+      <div id="step5" class="step-box">
+        <div style="font-size:40px; margin-bottom:10px;">✅</div>
+        <h2 class="tut-instruction">¡Listo!</h2>
+        <p class="tut-desc">Recuerda: <b>Halo Naranja</b> = Publicidad/Engaño. <b>Halo Azul</b> = Informativo.<br>¡Cuidado con las ofertas falsas!</p>
+        <button class="btn primary big" onclick="startGame()">🚀 INICIAR MISIÓN</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PANTALLA 2: JUEGO -->
+  <section id="screenGame" class="screen">
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+      <h3 id="scenarioTitle" style="margin:0; color:var(--accent)">Escenario 1</h3>
+      <span id="progText" style="font-size:14px; color:var(--muted)">0/3</span>
+    </div>
+
+    <!-- Área de Juego -->
+    <div id="playArea" class="play-area"></div>
+
+    <!-- Controles -->
+    <div class="hud-actions">
+      <button id="btnClassifyInfo" class="btn ok" disabled>📚 Es Informativo</button>
+      <button id="btnClassifySell" class="btn warn" disabled>💰 Es Publicidad</button>
+      
+      <div class="full-row">
+        <button id="btnScanner" class="btn primary big" style="width:100%">🔦 REVELADOR (ON/OFF)</button>
       </div>
     </div>
   </section>
 
-  <!-- CITY / SCENARIOS -->
-  <section id="cityScreen" class="screen" aria-labelledby="ctitle">
-    <h2 id="ctitle">🏙️ Ciudad — Escenarios</h2>
+  <!-- PANTALLA 3: REPORTE -->
+  <section id="screenReport" class="screen">
+    <div class="tut-container">
+      <h2>📊 Resultado Final</h2>
+      <h1 id="finalScore" style="font-size:48px; margin:10px 0; color:var(--gold)">0</h1>
+      <p id="finalMsg">...</p>
+      
+      <div style="margin-top:20px; text-align:left; background:#111; padding:15px; border-radius:8px;">
+        <small>Espectros encontrados:</small>
+        <div id="pediaList" style="margin-top:5px;"></div>
+      </div>
 
-    <!-- Scenario container -->
-    <div id="scenarioContainer" class="city">
-      <!-- Play area dynamically filled -->
-      <div id="playArea" class="play-area" aria-live="polite"></div>
-
-      <!-- HUD actions -->
       <div class="hud-actions">
-        <div class="classify" aria-label="Clasificar">
-          <button id="btnInfo" class="btn big ok" disabled>📚 Clasificar</button>
-          <button id="btnSell" class="btn big warn" disabled>💰 Clasificar</button>
-        </div>
-        <div class="row">
-          <button id="btnReveal" class="btn big">🔦 Activar Revelador</button>
-          <button id="btnRetry" class="btn big">🔁 Reintentar</button>
-        </div>
-      </div>
-
-      <div class="glossary" aria-label="Glosario">
-        <b>Glosario — Señales de anuncio</b>
-        <ul>
-          <li>🎨 Colores muy vivos</li>
-          <li>⏱️ Urgencia: “OFERTA”, “COMPRA YA”, temporizador</li>
-          <li>🏷️ “patrocinado”</li>
-          <li>🏷️ Código de descuento</li>
-        </ul>
-        <small>Frase de poder: <i>“¡Con colores y prisa me quieren llevar, pero yo decido en qué confiar!”</i></small>
+        <button class="btn primary" onclick="startCampaign()">🔁 Reintentar</button>
+        <button class="btn warn" onclick="startTimeAttack()">⏱️ Contrarreloj</button>
       </div>
     </div>
   </section>
 
-  <!-- REPORT -->
-  <section id="reportScreen" class="screen" aria-labelledby="rtitle">
-    <h2 id="rtitle">📊 Reporte de la Misión</h2>
-    <div class="report">
-      <div id="reportSummary" class="card"></div>
-      <div class="card">
-        <h3>🎒 Espectro-pedia</h3>
-        <div id="pedia" class="pedia"></div>
-      </div>
-      <div class="center">
-        <button id="btnTimeAttack" class="btn big primary">⏱️ Modo Contrarreloj (20 en 60 s)</button>
-        <button id="btnReset" class="btn big">🔄 Reiniciar Campaña</button>
-      </div>
-    </div>
-  </section>
 </main>
 
-<!-- Overlay Pause -->
-<div id="pauseOverlay" class="overlay" role="dialog" aria-modal="true">
+<!-- LENTE -->
+<div id="lens" class="lens"></div>
+
+<!-- OVERLAY PAUSA -->
+<div id="overlay" class="overlay">
   <div class="modal">
-    <h3>🛑 Pausa de aprendizaje</h3>
-    <p id="pauseText">Muchos errores seguidos o 3 clics en “comprar”. <br/>El Jefe dice: “Volvamos a calibrar el Revelador”.</p>
-    <div class="center">
-      <button id="btnResume" class="btn big ok">🔁 Reintentar escenario</button>
-    </div>
+    <h2 id="modalTitle" style="color:var(--warn)">¡ALTO!</h2>
+    <p id="modalText">Texto...</p>
+    <button class="btn primary" onclick="closeModal()">Continuar</button>
   </div>
 </div>
 
-<!-- Scanner lens -->
-<div id="lens" class="lens" aria-hidden="true"></div>
-
-<!-- Live region for voice text -->
-<div id="aria" class="sr-only" aria-live="polite"></div>
-
 <script>
-/* 
-  ===========================
-   Los Caza-Anuncios: Misión Revelación
-  ===========================
-  Diseño educativo (2° primaria):
-  - Diferenciar INFORMAR (📚) vs VENDER/PERSUADIR (💰).
-  - El "Revelador" muestra un AURA sobre los elementos: azul 📚 o naranja 💰.
-  - Al clasificar, si es error, se resaltan señales publicitarias (urgencia, colores, "patrocinado", código).
-  - Comentarios explican el enfoque de ciudadanía digital.
-*/
+/* LOGICA DEL JUEGO */
 
-/* ---------- Utilidades de audio simples (sin archivos, usando WebAudio) ---------- */
-const AudioKit = (() => {
-  const ctx = typeof AudioContext !== 'undefined' ? new AudioContext() :
-              typeof webkitAudioContext !== 'undefined' ? new webkitAudioContext() : null;
-  function beep(freq=880, dur=0.12, type='sine', gain=0.05){
-    if(!ctx) return;
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.value = gain; o.connect(g); g.connect(ctx.destination);
-    o.start();
-    setTimeout(()=>{ o.stop(); }, dur*1000);
+// Audio Simple
+const Sfx = {
+  ctx: new (window.AudioContext || window.webkitAudioContext)(),
+  play(type) {
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    const now = this.ctx.currentTime;
+    
+    if (type === 'toggle') { 
+      osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.1);
+      osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'ok') {
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+      osc.start(now); osc.stop(now + 0.2);
+    } else if (type === 'bad') {
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+      gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
+      osc.start(now); osc.stop(now + 0.3);
+    }
   }
-  return {
-    ok(){beep(900,0.11,'triangle',0.06)},
-    info(){beep(650,0.11,'sine',0.05)},
-    warn(){beep(200,0.18,'square',0.07)},
-    bonus(){beep(600,0.09,'sawtooth',0.06); setTimeout(()=>beep(900,0.09,'sawtooth',0.06),100)}
-  };
-})();
-
-/* ---------- Voz opcional ---------- */
-let voiceOn = false;
-const voiceToggle = document.getElementById('voiceToggle');
-voiceToggle.addEventListener('change', ()=> voiceOn = voiceToggle.checked);
-function speak(text){
-  document.getElementById('aria').textContent = text;
-  if(!voiceOn || !('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'es-MX';
-  u.rate = 1; u.pitch = 1;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
-}
-
-/* ---------- Estado global ---------- */
-const State = {
-  current:'BRIEFING',
-  scenarioIndex:0,
-  score:0,
-  streak:0,
-  lives:3,
-  consErrors:0,
-  buyClicks:0,
-  analyzedSet:new Set(), // ids escaneados al menos una vez
-  revealedAds:new Set(), // ids clasificados correctamente como 💰
-  errorSignals:new Set(), // señales aprendidas en errores
-  pedia:new Set(), // tipos de espectros descubiertos
-  totalTargets:0,
-  classifiedThisScenario:0,
-  timeAttack:false,
 };
-const Chips = {
-  state: document.getElementById('stateChip'),
-  score: document.getElementById('scoreChip'),
-  prog: document.getElementById('progChip'),
-  lives: document.getElementById('livesChip'),
-};
-function updateHUD(){
-  Chips.state.textContent = State.current;
-  Chips.score.textContent = `Puntaje: ${State.score}`;
-  Chips.prog.textContent  = `Progreso: ${State.classifiedThisScenario}/${State.totalTargets}`;
-  const hearts = '❤️'.repeat(State.lives) + '🖤'.repeat(Math.max(0,3-State.lives));
-  Chips.lives.innerHTML = `Vidas: <span>${hearts}</span>`;
-}
 
-/* ---------- Estructura de datos de escenarios ---------- */
-const scenarios = [
+const Game = {
+  mode: 'tutorial', 
+  scanning: false,
+  lives: 3, score: 0, level: 0,
+  completedInLevel: 0, targetInLevel: 0,
+  currentTarget: null, // Card seleccionada
+  pedia: new Set()
+};
+
+const Scenarios = [
   {
-    id:'esc1',
-    title:'Escenario 1 — La Página de Videos',
-    type:'videos',
-    pediaType:'video-anuncio',
-    targets:[
-      {
-        id:'videoA', title:'Cómo hacer un volcán de bicarbonato', copy:'Experimento paso a paso.',
-        initialIntent:'info', revealedIntent:'info', tricks:[], kind:'video'
-      },
-      {
-        id:'videoB', title:'¡Nueva Muñeca que Habla!', copy:'Canción pegajosa, colores intensos. ¡OFERTA!',
-        initialIntent:'sell', revealedIntent:'sell', tricks:['Colores brillantes','Urgencia "¡OFERTA!"'], kind:'video'
-      },
-      {
-        id:'videoC', title:'Tu YouTuber favorito jugando', copy:'Gameplay divertido',
-        initialIntent:'info', revealedIntent:'info', tricks:['Código de descuento "JUEGACOOL"','Integración comercial'], kind:'video', flipAfter:3000, flipTo:'sell'
-      },
+    title: "1. Videos",
+    items: [
+      { id:'v1', type:'video', title:'Volcán Casero', desc:'Tutorial paso a paso.', intent:'info', tricks:[] },
+      { id:'v2', type:'video', title:'¡JUGUETE NUEVO!', desc:'¡Cómpralo YA!', intent:'sell', tricks:['Urgencia', 'Gritos'] },
+      { id:'v3', type:'video', title:'Gameplay', desc:'Jugando Minecraft.', intent:'info', tricks:[] }
     ]
   },
   {
-    id:'esc2',
-    title:'Escenario 2 — El Juego Gratuito',
-    type:'runner',
-    pediaType:'pop-up',
-    targets:[
-      {
-        id:'flashPopup', title:'¡OFERTA FLASH!', copy:'Compra auto dorado por 100 gemas. ¡Solo 1 minuto!',
-        initialIntent:'sell', revealedIntent:'sell', tricks:['"OFERTA FLASH"','Temporizador','Botón COMPRAR'], kind:'popup'
-      }
+    title: "2. Juego Gratis",
+    items: [
+      { id:'popup1', type:'popup', title:'⚡ OFERTA FLASH', desc:'Auto Dorado. Solo 100 gemas.', intent:'sell', tricks:['Temporizador', 'Botón Trampa'] }
     ]
   },
   {
-    id:'esc3',
-    title:'Escenario 3 — La Red Social',
-    type:'social',
-    pediaType:'publicación patrocinada',
-    targets:[
-      {
-        id:'sponPost', title:'Galletas perfectas', copy:'¡Las mejores galletas del universo!',
-        initialIntent:'sell', revealedIntent:'sell', tricks:['Etiqueta "patrocinado"','Logo visible'], kind:'sponsored'
-      }
+    title: "3. Red Social",
+    items: [
+      { id:'p1', type:'post', title:'Foto de mi perro', desc:'Paseando.', intent:'info', tricks:[] },
+      { id:'p3', type:'post-ad', title:'GALLETAS', desc:'¡Las mejores! #Patrocinado', intent:'sell', tricks:['Etiqueta Patrocinado'] }
     ]
   }
 ];
 
-/* ---------- Máquina de estados ---------- */
-const elBriefing = document.getElementById('briefingScreen');
-const elCity     = document.getElementById('cityScreen');
-const elReport   = document.getElementById('reportScreen');
-const playArea   = document.getElementById('playArea');
-
-function showScreen(name){
-  for(const s of [elBriefing, elCity, elReport]) s.classList.remove('active');
-  if(name==='BRIEFING'){ elBriefing.classList.add('active'); }
-  if(name==='CITY'){ elCity.classList.add('active'); }
-  if(name==='REPORT'){ elReport.classList.add('active'); }
-  State.current = name;
-  updateHUD();
+// --- TUTORIAL ---
+function nextStep(n) {
+  document.querySelectorAll('.step-box').forEach(el => el.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  
+  if(n === 2) {
+    const btn = document.getElementById('btnTutScanner');
+    btn.onclick = () => {
+      toggleScanner(true);
+      btn.classList.remove('pulse'); btn.innerText = "REVELADOR ENCENDIDO";
+      setTimeout(() => nextStep(3), 800);
+    };
+  }
+  if(n === 3) {
+    const t = document.getElementById('tutTarget');
+    t.onclick = () => {
+      t.classList.add('selected');
+      t.querySelector('.halo').className = 'halo sell'; 
+      t.querySelector('.halo').style.opacity = 1;
+      document.getElementById('tutStatus').innerText = "✅ Tarjeta Seleccionada";
+      document.getElementById('tutStatus').style.color = "var(--ok)";
+      setTimeout(() => nextStep(4), 800);
+    };
+  }
+  if(n === 4) {
+    document.getElementById('btnTutInfo').onclick = () => { Sfx.play('bad'); alert("Incorrecto. Mira el halo naranja."); };
+    document.getElementById('btnTutSell').onclick = () => {
+      Sfx.play('ok');
+      const s = document.getElementById('tutTarget').querySelector('.stamp');
+      s.className = 'stamp on ok'; s.innerText = "¡ANUNCIO!";
+      toggleScanner(false);
+      setTimeout(() => nextStep(5), 1000);
+    };
+  }
 }
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  startBriefing();
-});
+// --- CORE ---
+function startGame() { startCampaign(); }
 
-function startBriefing(){
-  speak('Bienvenido, Caza Anuncios. Recibe el Revelador de Intenciones.');
-  showScreen('CITY');
-  State.scenarioIndex = 0;
-  startScenario(scenarios[0].id);
+function startCampaign() {
+  Game.mode = 'campaign'; Game.lives = 3; Game.score = 0; Game.pedia.clear();
+  toggleScanner(false);
+  loadLevel(0);
+  switchScreen('screenGame');
 }
 
-/* ---------- Escenarios ---------- */
-function startScenario(id){
-  const sc = scenarios.find(s=>s.id===id);
-  if(!sc) return;
-  State.classifiedThisScenario = 0;
-  State.totalTargets = sc.targets.length;
-  State.consErrors = 0;
-  State.buyClicks = 0;
-  updateHUD();
-  playArea.innerHTML = '';
-  const h = document.createElement('h3'); h.textContent = '🎬 ' + sc.title;
-  playArea.appendChild(h);
-
-  if(sc.type==='videos'){ renderScenario1(sc); }
-  if(sc.type==='runner'){ renderScenario2(sc); }
-  if(sc.type==='social'){ renderScenario3(sc); }
-
-  // Reset classify buttons
-  setCurrentTarget(null);
-  disableClassify(true);
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function renderScenario1(sc){
-  const grid = document.createElement('div'); grid.className='targets video-grid';
-  sc.targets.forEach(t=>{
-    const card = document.createElement('div');
-    card.className = 'card video-card';
-    card.dataset.targetId = t.id;
-    card.tabIndex = 0;
-    // Visual flavor
-    if(t.id==='videoB') card.innerHTML += `<div class="color-burst" aria-hidden="true"></div>`;
-    const halo = document.createElement('div'); halo.className='halo'; card.appendChild(halo);
-    const stamp = document.createElement('div'); stamp.className='stamp'; card.appendChild(stamp);
-    const explain = document.createElement('div'); explain.className='explain'; card.appendChild(explain);
+function loadLevel(idx) {
+  if(idx >= Scenarios.length) { showReport(); return; }
+  Game.level = idx; Game.completedInLevel = 0;
+  const sc = Scenarios[idx];
+  Game.targetInLevel = sc.items.length;
+  
+  document.getElementById('scenarioTitle').textContent = sc.title;
+  const area = document.getElementById('playArea');
+  area.innerHTML = ''; area.className = 'play-area';
 
-    const tag = document.createElement('div'); tag.className='tag'; tag.textContent='🎞️ Video'; card.appendChild(tag);
-
-    const h3=document.createElement('h3'); h3.textContent = t.title + (t.id==='videoB'?' — 15s':''); card.appendChild(h3);
-    const p=document.createElement('p'); p.textContent = t.copy; card.appendChild(p);
-
-    // Special for videoC: hidden code appears after reveal flip
-    if(t.id==='videoC'){
-      const code = document.createElement('div');
-      code.style.position='absolute'; code.style.bottom='10px'; code.style.left='10px';
-      code.style.fontWeight='900'; code.style.display='none';
-      code.textContent='Usen mi código JUEGACOOL para comprarlo';
-      code.className='code-msg';
-      card.appendChild(code);
-    }
-
-    grid.appendChild(card);
-  });
-  playArea.appendChild(grid);
+  if(idx === 1) { // Popup Level
+    area.innerHTML = '<h3 style="opacity:0.5;">🎮 Jugando...</h3>';
+    setTimeout(() => spawnPopup(sc.items[0]), 800);
+  } else {
+    const grid = document.createElement('div');
+    grid.className = idx === 2 ? 'feed' : 'video-grid';
+    sc.items.forEach(item => {
+      const c = document.createElement('div');
+      c.className = 'card';
+      c.dataset.id = item.id; c.dataset.intent = item.intent; c.dataset.tricks = JSON.stringify(item.tricks);
+      let icon = item.type === 'video' ? '🎬' : '📄';
+      c.innerHTML = `<div class="halo"></div><h3>${icon} ${item.title}</h3><p>${item.desc}</p><div class="stamp"></div><div class="explain"></div>`;
+      c.addEventListener('click', () => selectCard(c));
+      grid.appendChild(c);
+    });
+    area.appendChild(grid);
+  }
+  updateUI(); resetControls();
 }
 
-function renderScenario2(sc){
-  const track = document.createElement('div'); track.className='card'; track.style.minHeight='240px';
-  track.innerHTML = `<h3>🏎️ Carrera en marcha...</h3><p>¡Sigue hasta que aparezca algo sospechoso!</p>`;
-  playArea.appendChild(track);
-
-  // Popup
+function spawnPopup(item) {
+  // Limpiar el área antes de añadir el popup para evitar duplicados
+  const area = document.getElementById('playArea');
+  area.innerHTML = '';
+  
   const pop = document.createElement('div');
-  pop.className='popup'; pop.dataset.targetId = 'flashPopup';
-  pop.innerHTML = `
-    <h3 style="color:var(--gold); font-size:26px">⚡ ¡OFERTA FLASH!</h3>
-    <p>Compra auto dorado por <b>100 gemas</b>. <span class="timer">00:59</span> restantes.</p>
-    <div class="row">
-      <button class="buy-btn" id="fakeBuyBtn">COMPRAR</button>
-      <button class="btn" id="fakeCloseBtn">Cerrar</button>
-    </div>
-    <div class="halo"></div>
-    <div class="stamp"></div>
-    <div class="explain"></div>
-  `;
-  playArea.appendChild(pop);
-
-  // Timer + show popup after short delay
-  setTimeout(()=>{ pop.classList.add('on'); startPopupTimer(pop.querySelector('.timer')); speak('¡Atención! Apareció una oferta flash. Escanéala con el Revelador.'); }, 1200);
-
-  document.getElementById('fakeBuyBtn').addEventListener('click', ()=>{
-    State.buyClicks++;
-    if(State.buyClicks>=3){ triggerPause('Hiciste 3 clics en COMPRAR. ¡Cuidado con las compras impulsivas!'); }
+  pop.className = 'popup-ad active';
+  pop.dataset.id = item.id; pop.dataset.intent = item.intent; pop.dataset.tricks = JSON.stringify(item.tricks);
+  pop.innerHTML = `<div class="halo"></div><h2 style="color:var(--gold)">${item.title}</h2><p>${item.desc}</p><h1 style="color:white; margin:10px 0;">00:59</h1><button class="btn warn" id="trapBtn" style="width:100%">COMPRAR</button><div class="stamp"></div><div class="explain"></div>`;
+  
+  pop.addEventListener('click', (e) => {
+    if(e.target.id !== 'trapBtn') selectCard(pop);
   });
-  document.getElementById('fakeCloseBtn').addEventListener('click', ()=>{
-    // Solo se cierra si clasifica correctamente 💰
-    speak('Primero clasifica para cerrar.');
+  
+  area.appendChild(pop);
+  
+  document.getElementById('trapBtn').addEventListener('click', (e) => {
+    e.stopPropagation(); takeDamage("¡Caíste en la trampa! No compres por impulso.");
   });
 }
 
-function renderScenario3(sc){
-  const feed = document.createElement('div'); feed.className='feed';
-  // Amigos (informativos/entretenimiento)
-  ['Foto de mi gato','Paseo en bici','Mi dibujo nuevo'].forEach((t,i)=>{
-    const post = document.createElement('div'); post.className='card post';
-    post.innerHTML = `<h3>👫 Amig@ ${i+1}</h3><p>${t}</p>`;
-    feed.appendChild(post);
+// --- SELECCION Y ESCANER ---
+function selectCard(el) {
+  if(el.classList.contains('solved')) return;
+  document.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
+  
+  Game.currentTarget = el;
+  el.classList.add('selected');
+  
+  // Actualizar halo basado en selección
+  const halo = el.querySelector('.halo');
+  const intent = el.dataset.intent;
+  halo.className = `halo ${intent}`; 
+  
+  if(Game.scanning) halo.style.opacity = 1; 
+  else halo.style.opacity = 0; 
+  
+  // Habilitar botones
+  document.getElementById('btnClassifyInfo').disabled = false;
+  document.getElementById('btnClassifySell').disabled = false;
+}
+
+const scanBtn = document.getElementById('btnScanner');
+scanBtn.addEventListener('click', () => toggleScanner(!Game.scanning));
+
+function toggleScanner(state) {
+  Game.scanning = state;
+  Sfx.play('toggle');
+  const lensEl = document.getElementById('lens');
+  if(Game.scanning) {
+    lensEl.classList.add('on');
+    scanBtn.classList.add('active-tool');
+    scanBtn.textContent = "🔦 REVELADOR (ON)";
+    if(Game.currentTarget) Game.currentTarget.querySelector('.halo').style.opacity = 1;
+  } else {
+    lensEl.classList.remove('on');
+    scanBtn.classList.remove('active-tool');
+    scanBtn.textContent = "🔦 REVELADOR (OFF)";
+    if(Game.currentTarget) Game.currentTarget.querySelector('.halo').style.opacity = 0;
+  }
+}
+
+// Movimiento del lente
+const lensEl = document.getElementById('lens');
+function moveLens(x, y) {
+  if(!Game.scanning) return;
+  lensEl.style.left = (x - 60) + 'px';
+  lensEl.style.top = (y - 60) + 'px';
+  
+  // Reset halos no seleccionados
+  document.querySelectorAll('.halo').forEach(h => {
+     if(h.parentElement !== Game.currentTarget) h.style.opacity = 0;
   });
 
-  // Sponsored post
-  const s = sc.targets[0];
-  const sponsored = document.createElement('div');
-  sponsored.className='card post img-cookie';
-  sponsored.dataset.targetId=s.id;
-  sponsored.innerHTML = `
-    <div class="spon-tag">patrocinado</div>
-    <div class="logo-box">GALLETIX™</div>
-    <h3>🍪 ${s.title}</h3>
-    <p>${s.copy}</p>
-    <div class="halo"></div>
-    <div class="stamp"></div>
-    <div class="explain"></div>
-  `;
-  feed.appendChild(sponsored);
-
-  playArea.appendChild(feed);
-}
-
-/* Popup timer (scenario 2) */
-function startPopupTimer(el){
-  let n=59; el.textContent='00:59';
-  const id=setInterval(()=>{
-    n--; if(n<0){ clearInterval(id); return; }
-    const s = n.toString().padStart(2,'0');
-    el.textContent=`00:${s}`;
-  },1000);
-}
-
-/* ---------- Revelado y clasificación ---------- */
-let currentTargetId = null;
-function setCurrentTarget(id){
-  currentTargetId = id;
-  disableClassify(!id);
-}
-
-function disableClassify(dis=true){
-  document.getElementById('btnInfo').disabled = dis;
-  document.getElementById('btnSell').disabled = dis;
-}
-
-function targetById(id){
-  const sc = scenarios[State.scenarioIndex];
-  if(State.timeAttack && TA.deck){ return TA.deck.find(t=>t.id===id); }
-  return sc.targets.find(t=>t.id===id);
-}
-
-/* Activa el escáner al mantener pulsado o con botón/espacio */
-const lens = document.getElementById('lens');
-let scanning = false;
-let cursor = {x:window.innerWidth/2, y:window.innerHeight/2};
-let rafId = null;
-
-function activateScanner(){
-  scanning = true;
-  lens.classList.add('scanning');
-  AudioKit.info();
-}
-function deactivateScanner(){
-  scanning = false;
-  lens.classList.remove('scanning');
-}
-
-function revealIntent(targetId){
-  const t = targetById(targetId);
-  if(!t) return;
-  State.analyzedSet.add(t.id);
-
-  // Logica especial: videoC que cambia de intención tras 3s
-  if(t.id==='videoC' && t.flipAfter && t.revealedIntent!=='sell'){
-    const card = findCardById(t.id);
-    const codeMsg = card?.querySelector('.code-msg');
-    setTimeout(()=>{
-      t.revealedIntent = t.flipTo; // cambia a vender
-      if(codeMsg){ codeMsg.style.display='block'; }
-      // Feedback visual inmediato si sigue revelando
-      if(card){ applyHalo(card, t.revealedIntent); }
-      speak('Atención: ahora hay código JUEGACOOL. Cambió a vender.');
-    }, t.flipAfter);
+  const el = document.elementFromPoint(x, y);
+  const card = el ? el.closest('[data-intent]') : null;
+  if(card && !card.classList.contains('solved')) {
+    const intent = card.dataset.intent;
+    const h = card.querySelector('.halo');
+    h.className = `halo ${intent}`;
+    h.style.opacity = 1;
   }
-
-  // Visual: halo + icono
-  const card = findCardById(t.id);
-  if(card){ applyHalo(card, t.revealedIntent || t.initialIntent); }
-
-  setCurrentTarget(t.id);
+  
+  if(Game.currentTarget) Game.currentTarget.querySelector('.halo').style.opacity = 1;
 }
+document.addEventListener('mousemove', e => moveLens(e.clientX, e.clientY));
+document.addEventListener('touchmove', e => moveLens(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
 
-function applyHalo(card, intent){
-  const halo = card.querySelector('.halo');
-  halo.className = 'halo ' + (intent==='sell'?'sell':'info');
-  halo.style.display='block';
-}
+// --- CLASIFICACION ---
+document.getElementById('btnClassifyInfo').addEventListener('click', () => makeDecision('info'));
+document.getElementById('btnClassifySell').addEventListener('click', () => makeDecision('sell'));
 
-function classify(choice){
-  if(!currentTargetId) return;
-  const t = targetById(currentTargetId);
-  const right = (t.revealedIntent || t.initialIntent) === (choice==='info'?'info':'sell');
-  const card = findCardById(t.id);
-  const stamp = card?.querySelector('.stamp');
-  const explain = card?.querySelector('.explain');
-
-  // sello + feedback
-  if(stamp){
-    stamp.className='stamp on ' + (right?'ok':'warn');
-    stamp.textContent = right ? (choice==='info' ? '📚 Contenido para aprender' : '💰 ¡Anuncio identificado!') 
-                              : '❌ Revisa las señales';
-  }
-
-  if(right){
-    // score, streak, bonus
-    State.score += 1;
-    State.streak += 1;
-    State.consErrors = 0;
-    if(choice==='sell'){ State.revealedAds.add(t.id); }
-    if(State.streak>0 && State.streak%3===0){ State.score += 1; flashBonus(); }
-    AudioKit.ok();
-    speak(choice==='sell' ? '¡Anuncio identificado!' : '¡Correcto! Es para aprender.');
-  }else{
-    State.score -= 1;
-    State.streak = 0;
-    State.consErrors += 1;
-    State.lives = Math.max(0, State.lives - 1);
-    AudioKit.warn();
-    // mostrar explicación de trucos
-    if(explain){
-      explain.classList.add('on');
-      explain.innerHTML = `
-        <p><b>¿Por qué es publicidad?</b></p>
-        <ul>${t.tricks.map(s=>`<li>🔎 ${highlightSignal(s)}</li>`).join('')}</ul>
-        <p><i>“¡Con colores y prisa me quieren llevar, pero yo decido en qué confiar!”</i></p>
-      `;
-      // Registrar señales aprendidas en error
-      t.tricks.forEach(s=> State.errorSignals.add(signalKey(s)));
+function makeDecision(choice) {
+  if(!Game.currentTarget) return;
+  const el = Game.currentTarget;
+  const real = el.dataset.intent;
+  const stamp = el.querySelector('.stamp');
+  
+  if(choice === real) {
+    Sfx.play('ok');
+    stamp.className = 'stamp on ok'; stamp.textContent = choice==='info' ? "SEGURO" : "ANUNCIO";
+    Game.score += 100;
+    if(real === 'sell') {
+      const t = el.querySelector('h2') ? el.querySelector('h2').textContent : el.querySelector('h3').textContent;
+      Game.pedia.add(t.replace(/[^a-zA-Z ]/g,"").substring(0,12));
     }
-    speak('Error. Observa las señales publicitarias.');
-    if(State.consErrors>=3 || State.lives===0){ triggerPause('Demasiados errores. Respiremos y volvamos a intentar.'); return; }
-  }
-
-  // marcar como clasificado (evitar doble conteo)
-  if(!t._done){
-    t._done = true;
-    State.classifiedThisScenario++;
-  }
-  updateHUD();
-
-  // completar escenario si procede
-  checkScenarioClear();
-}
-
-function highlightSignal(text){
-  // resalta palabras clave
-  return text
-    .replace(/OFERTA|FLASH|COMPRA|COMPRA YA|URG(ENCIA)?/gi,'<b>$&</b>')
-    .replace(/patrocinado/gi,'<b>patrocinado</b>')
-    .replace(/código|descuento|JUEGACOOL/gi,'<b>$&</b>');
-}
-
-function signalKey(s){ return s.toLowerCase().replace(/\s+/g,' ').trim(); }
-
-function flashBonus(){
-  const b = document.createElement('div');
-  b.className='badge'; b.style.position='fixed'; b.style.top='64px'; b.style.left='50%';
-  b.style.transform='translateX(-50%)'; b.style.zIndex='80';
-  b.style.borderColor='#3ad'; b.style.background='#09222b';
-  b.textContent='🔥 ¡Mini-BONUS por racha!';
-  document.body.appendChild(b); AudioKit.bonus();
-  setTimeout(()=>{ b.remove(); }, 1200);
-}
-
-/* ---------- Avance de escenario / reporte ---------- */
-function checkScenarioClear(){
-  if(State.classifiedThisScenario >= State.totalTargets){
-    // Añadir a pedia el tipo de espectro del escenario si al menos un 💰 correcto
-    const sc = scenarios[State.scenarioIndex];
-    if([...State.revealedAds].some(id=> (sc.targets.map(t=>t.id)).includes(id))){
-      State.pedia.add(sc.pediaType);
+    el.classList.add('solved');
+    el.classList.remove('selected');
+    
+    // IMPORTANTE: Limpiar control y timeout seguro
+    resetControls();
+    setTimeout(checkProgress, 800);
+  } else {
+    Sfx.play('bad');
+    // NO quitamos la selección ni deshabilitamos controles para permitir reintento rápido
+    stamp.className = 'stamp on warn'; stamp.textContent = "ERROR";
+    const tricks = JSON.parse(el.dataset.tricks);
+    const expl = el.querySelector('.explain');
+    if(expl) {
+      expl.classList.add('on');
+      expl.innerHTML = `<b>¡Te engañaron!</b><br>Usaron: ${tricks.join(', ')}`;
     }
-    setTimeout(()=>{
-      // Siguiente
-      if(State.timeAttack){
-        TA.nextRound();
-        return;
-      }
-      if(State.scenarioIndex < scenarios.length - 1){
-        State.scenarioIndex++;
-        startScenario(scenarios[State.scenarioIndex].id);
-      }else{
-        showReport();
-      }
-    }, 400);
+    takeDamage("Clasificaste mal. Intenta de nuevo.");
   }
 }
 
-function showReport(){
-  showScreen('REPORT');
-  const analyzed = State.analyzedSet.size;
-  const revealed = State.revealedAds.size;
-  const errors = Math.max(0, (analyzed - (revealed + countInfoCorrect())));
-  const learned = [...State.errorSignals].map(s=>`<span class="badge">${s}</span>`).join(' ') || '<i>—</i>';
-
-  const sum = document.getElementById('reportSummary');
-  sum.innerHTML = `
-    <h3>Resumen</h3>
-    <p><span class="badge">Analizaste: ${analyzed}</span>
-       <span class="badge">Revelaste Espectros 💰: ${revealed}</span>
-       <span class="badge">Errores estimados: ${errors}</span>
-       <span class="badge">Puntaje final: ${State.score}</span>
-    </p>
-    <p>Señales aprendidas: ${learned}</p>
-    <p class="badge" style="border-color:#6c6; background:#0f2415">✅ ¡Misión cumplida! Tu ojo crítico es de élite.</p>
-  `;
-
-  const p = document.getElementById('pedia');
-  p.innerHTML = '';
-  [
-    {k:'video-anuncio',desc:'Tarjeta de video con intención de vender.'},
-    {k:'pop-up',desc:'Ventana emergente que interrumpe para vender.'},
-    {k:'publicación patrocinada',desc:'Post con etiqueta "patrocinado" o logo.'},
-  ].forEach(item=>{
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML = `<h4>${item.k}</h4><p>${item.desc}</p><div style="position:absolute;right:10px;bottom:8px;font-weight:900">${State.pedia.has(item.k)?'🔓 Descubierto':'🔒 Por descubrir'}</div>`;
-    p.appendChild(c);
-  });
-}
-
-function countInfoCorrect(){
-  // Cuenta cuántos 📚 correctos se clasificaron (aprox. = analizados info correctos)
-  let n=0;
-  for(const sc of scenarios){
-    for(const t of sc.targets){
-      if(t._done && (t.revealedIntent||t.initialIntent)==='info') n++;
+function checkProgress() {
+  Game.completedInLevel++;
+  updateUI();
+  
+  // Verificamos si terminamos el nivel actual
+  if(Game.completedInLevel >= Game.targetInLevel) {
+    if(Game.mode === 'campaign') {
+      // Forzar limpieza completa del DOM antes de cargar el siguiente nivel
+      // esto soluciona el "congelamiento" del popup
+      document.getElementById('playArea').innerHTML = '';
+      setTimeout(() => loadLevel(Game.level + 1), 100);
+    } else {
+      nextTARound();
     }
   }
-  if(State.timeAttack && TA.resultsInfo) n += TA.resultsInfo;
-  return n;
 }
 
-function resetGame(){
-  // Limpia banderas de cada target
-  scenarios.forEach(sc=> sc.targets.forEach(t=>{
-    t._done=false; t.revealedIntent = t.initialIntent;
-  }));
-  State.current='BRIEFING';
-  State.scenarioIndex=0; State.score=0; State.streak=0; State.lives=3; State.consErrors=0;
-  State.buyClicks=0; State.analyzedSet.clear(); State.revealedAds.clear(); State.errorSignals.clear();
-  State.pedia.clear(); State.totalTargets=0; State.classifiedThisScenario=0; State.timeAttack=false;
-  updateHUD();
-  showScreen('BRIEFING');
-}
-
-/* ---------- Pausa / Reintento ---------- */
-function triggerPause(msg){
-  const overlay = document.getElementById('pauseOverlay');
-  document.getElementById('pauseText').innerHTML = msg;
-  overlay.classList.add('on');
-  speak('Pausa de aprendizaje. Intentemos de nuevo.');
-}
-document.getElementById('btnResume').addEventListener('click', ()=>{
-  document.getElementById('pauseOverlay').classList.remove('on');
-  // Reiniciar escenario actual
-  State.lives=3; State.consErrors=0; State.buyClicks=0; State.streak=0;
-  const sc = scenarios[State.scenarioIndex];
-  sc.targets.forEach(t=>{ t._done=false; t.revealedIntent=t.initialIntent; });
-  startScenario(sc.id);
-});
-document.getElementById('btnRetry').addEventListener('click', ()=>{
-  State.lives=3; State.consErrors=0; State.buyClicks=0; State.streak=0;
-  const sc = scenarios[State.scenarioIndex];
-  sc.targets.forEach(t=>{ t._done=false; t.revealedIntent=t.initialIntent; });
-  startScenario(sc.id);
-});
-
-/* ---------- UI helpers ---------- */
-function findCardById(id){
-  return playArea.querySelector(`[data-target-id="${CSS.escape(id)}"]`);
-}
-
-/* ---------- Controles: mouse / tacto / teclado ---------- */
-function onMove(x,y){
-  cursor.x=x; cursor.y=y;
-  lens.style.left = (x-55)+'px';
-  lens.style.top  = (y-55)+'px';
-}
-window.addEventListener('mousemove', e=>onMove(e.clientX,e.clientY), {passive:true});
-window.addEventListener('touchstart', e=>{
-  const t=e.changedTouches[0]; onMove(t.clientX,t.clientY);
-  activateScanner();
-}, {passive:true});
-window.addEventListener('touchmove', e=>{
-  const t=e.changedTouches[0]; onMove(t.clientX,t.clientY);
-}, {passive:true});
-window.addEventListener('touchend', ()=> deactivateScanner(), {passive:true});
-
-window.addEventListener('mousedown', (e)=>{
-  if(e.button===0){ activateScanner(); }
-});
-window.addEventListener('mouseup', (e)=>{
-  if(e.button===0){ deactivateScanner(); }
-});
-
-// Botón Activar Revelador
-document.getElementById('btnReveal').addEventListener('mousedown', activateScanner);
-document.getElementById('btnReveal').addEventListener('mouseup', deactivateScanner);
-document.getElementById('btnReveal').addEventListener('touchstart', (e)=>{e.preventDefault(); activateScanner();}, {passive:false});
-document.getElementById('btnReveal').addEventListener('touchend', (e)=>{e.preventDefault(); deactivateScanner();}, {passive:false});
-
-// Teclado
-window.addEventListener('keydown', (e)=>{
-  if(e.code==='Space'){ e.preventDefault(); activateScanner(); }
-  if(e.key==='1'){ classify('info'); }
-  if(e.key==='2'){ classify('sell'); }
-  if(e.key==='r' || e.key==='R'){ document.getElementById('btnRetry').click(); }
-});
-window.addEventListener('keyup', (e)=>{ if(e.code==='Space'){ deactivateScanner(); } });
-
-// Botones de clasificar
-document.getElementById('btnInfo').addEventListener('click', ()=> classify('info'));
-document.getElementById('btnSell').addEventListener('click', ()=> classify('sell'));
-
-/* ---------- Bucle de escaneo con rAF (detectar objetivos bajo la lente) ---------- */
-function scanLoop(){
-  if(scanning){
-    const cx = cursor.x, cy = cursor.y;
-    // buscamos el elemento con data-target-id más cercano al centro de la lente
-    const els = document.elementsFromPoint(cx, cy);
-    const targetEl = els.find(el=> el instanceof Element && el.dataset && el.dataset.targetId);
-    if(targetEl){
-      const id = targetEl.dataset.targetId;
-      revealIntent(id);
-    }
+function takeDamage(msg) {
+  Game.lives--; updateUI();
+  if(Game.lives <= 0) {
+    openModal("¡Juego Terminado!", "Vuelve a intentar.");
+    document.querySelector('#overlay button').onclick = () => location.reload();
+  } else {
+    openModal("¡Cuidado!", msg);
   }
-  rafId = requestAnimationFrame(scanLoop);
-}
-rafId = requestAnimationFrame(scanLoop);
-
-/* ---------- Inicio / Siguiente / Reporte Buttons ---------- */
-document.getElementById('btnReset').addEventListener('click', resetGame);
-
-/* ---------- Modo Contrarreloj (opcional) ---------- */
-const TA = {
-  deck:null, idx:0, left:20, time:60, timerId:null, resultsInfo:0, resultsSell:0,
-  start(){
-    State.timeAttack=true; this.deck = this.makeDeck(20); this.idx=0; this.left=20; this.time=60; this.resultsInfo=0; this.resultsSell=0;
-    State.lives=3; State.consErrors=0; State.classifiedThisScenario=0; State.totalTargets=1;
-    showScreen('CITY'); startScenario(this.deck[0].__scid);
-    this.tick();
-  },
-  makeDeck(n){
-    const arr=[];
-    for(let i=0;i<n;i++){
-      const isSell = Math.random()<0.5;
-      arr.push({
-        id:'TA_'+i, title:isSell?'¡SUPER OFERTA!' : 'Dato curioso',
-        copy:isSell?'-20% solo hoy' : '¿Sabías que…?',
-        initialIntent:isSell?'sell':'info', revealedIntent:isSell?'sell':'info',
-        tricks:isSell?['Urgencia','Colores brillantes','Botón comprar']:[],
-        kind:isSell?'rand-sell':'rand-info',
-        __scid:'ta_'+i
-      });
-    }
-    return arr;
-  },
-  buildCard(t){
-    const card = document.createElement('div'); card.className='card'; card.dataset.targetId=t.id;
-    card.innerHTML = `<h3>${t.initialIntent==='sell'?'💰':'📚'} ${t.title}</h3><p>${t.copy}</p><div class="halo"></div><div class="stamp"></div><div class="explain"></div>`;
-    return card;
-  },
-  tick(){
-    clearInterval(this.timerId);
-    const chip = document.getElementById('stateChip');
-    chip.textContent = `CONTRARRELOJ ⏱️ ${this.time}s`;
-    this.timerId = setInterval(()=>{
-      this.time--; chip.textContent = `CONTRARRELOJ ⏱️ ${this.time}s`;
-      if(this.time<=0){
-        clearInterval(this.timerId);
-        showReport();
-      }
-    },1000);
-  },
-  nextRound(){
-    this.idx++;
-    this.left--;
-    if(this.left<=0){ showReport(); return; }
-    State.classifiedThisScenario=0; State.totalTargets=1;
-    startScenario(this.deck[this.idx].__scid);
-  }
-};
-
-document.getElementById('btnTimeAttack').addEventListener('click', ()=> TA.start());
-
-/* ---------- Render de escenario para Contrarreloj ---------- */
-function startScenarioTa(scid){
-  // no usado (integramos en startScenario), pero dejamos hook
 }
 
-/* ---------- Hook: startScenario para TA ---------- */
-const _origStartScenario = startScenario;
-startScenario = function(id){
-  if(State.timeAttack && id && id.startsWith('ta_')){
-    playArea.innerHTML='';
-    const t = TA.deck[TA.idx];
-    const h = document.createElement('h3'); h.textContent = `⏱️ Contrarreloj — ${TA.left} restantes`;
-    playArea.appendChild(h);
-    const holder = document.createElement('div'); holder.className='targets';
-    holder.appendChild(TA.buildCard(t));
-    playArea.appendChild(holder);
-    setCurrentTarget(null); disableClassify(true);
-    State.classifiedThisScenario=0; State.totalTargets=1; updateHUD();
-    return;
-  }
-  _origStartScenario(id);
+// --- CONTRARRELOJ ---
+function startTimeAttack() {
+  Game.mode='timeAttack'; Game.lives=3; Game.score=0; Game.pedia.clear();
+  Game.taRound=0; switchScreen('screenGame');
+  document.getElementById('scenarioTitle').textContent = "Contrarreloj";
+  nextTARound();
+}
+function nextTARound() {
+  Game.taRound++; Game.targetInLevel=1; Game.completedInLevel=0;
+  document.getElementById('playArea').innerHTML=''; 
+  document.getElementById('progText').textContent = `Ronda ${Game.taRound}`;
+  
+  const types = ['virus','survey','cheat','video','post'];
+  const type = types[Math.floor(Math.random()*types.length)];
+  const isTrap = Math.random() > 0.4;
+  
+  const c = document.createElement('div'); c.className='card';
+  c.dataset.intent = isTrap ? 'sell' : 'info';
+  c.dataset.tricks = isTrap ? '["Engaño"]' : '[]';
+  const title = isTrap ? "¡GANASTE!" : "Noticia";
+  c.innerHTML = `<div class="halo"></div><h3>${isTrap?'⚠️':'ℹ️'} ${title}</h3><p>Descripción...</p><div class="stamp"></div>`;
+  c.addEventListener('click', ()=>selectCard(c));
+  document.getElementById('playArea').appendChild(c);
+  resetControls();
 }
 
-/* ---------- Botón Reiniciar campaña desde reporte ---------- */
-document.getElementById('btnReset').addEventListener('click', resetGame);
-
-/* =================== Diferenciación informar vs vender (nota pedagógica) ===================
-   - 'informar' (📚): contenido cuyo objetivo es enseñar o explicar sin empujar a una compra.
-     En el juego: halo azul, sello “Contenido para aprender”, voz “¡Correcto! Es para aprender.”
-   - 'vender/persuadir' (💰): busca que compres o uses algo; usa señales como urgencia, colores vivos,
-     códigos y etiqueta “patrocinado”.
-     En el juego: halo naranja, sello “¡Anuncio identificado!”, y si hay error se muestran las señales.
-   ================================================================================================= */
-
-/* ---------- Iniciar HUD ---------- */
-updateHUD();
-
-/* ---------- START button: already wired ---------- */
+// UI & Modal
+function updateUI() {
+  document.getElementById('livesChip').textContent = "❤️".repeat(Math.max(0,Game.lives));
+  document.getElementById('scoreChip').textContent = Game.score;
+  document.getElementById('stateChip').textContent = Game.mode==='campaign' ? `NIVEL ${Game.level+1}` : 'CONTRARRELOJ';
+  document.getElementById('progText').textContent = `${Game.completedInLevel}/${Game.targetInLevel}`;
+}
+function resetControls() {
+  Game.currentTarget = null;
+  document.getElementById('btnClassifyInfo').disabled = true;
+  document.getElementById('btnClassifySell').disabled = true;
+  document.querySelectorAll('.selected').forEach(x=>x.classList.remove('selected'));
+}
+function showReport() {
+  switchScreen('screenReport');
+  document.getElementById('finalScore').textContent = Game.score;
+  document.getElementById('finalMsg').textContent = Game.lives>0?"¡Bien hecho!":"Intenta de nuevo";
+  const l = document.getElementById('pediaList'); l.innerHTML='';
+  Game.pedia.forEach(i=>l.innerHTML+=`<span style="background:#333;padding:4px;margin:2px;border-radius:4px;display:inline-block">${i}</span>`);
+}
+function openModal(t,x) {
+  document.getElementById('modalTitle').textContent=t;
+  document.getElementById('modalText').innerHTML=x;
+  document.getElementById('overlay').classList.add('active');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('active'); }
 
 </script>
 </body>
